@@ -2,7 +2,7 @@ from django.db import models
 
 
 class UserInformation(models.Model):
-    name = models.CharField(max_length=30, unique=True)
+    first_name = models.CharField(max_length=30, unique=True)
     last_name = models.CharField(max_length=100)
     education = models.CharField(max_length=200)
     city = models.CharField(max_length=100)
