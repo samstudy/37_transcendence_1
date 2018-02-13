@@ -3,5 +3,5 @@ from user_profiles.views import UserPageView
 
 
 urlpatterns = [
-    path('users/<pk>', UserPageView.as_view(), name='home')
+    path('users/<pk>', UserPageView.as_view(), name='user')
 ]
