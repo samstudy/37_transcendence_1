@@ -1,5 +1,5 @@
 from django.urls import path, include
-from user_profiles.views import UserPageView
+from users_profiles.views import UserPageView
 
 
 urlpatterns = [
