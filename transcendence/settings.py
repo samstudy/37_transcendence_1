@@ -90,9 +90,6 @@ class Base(Configuration):
     # https://docs.djangoproject.com/en/2.0/howto/static-files/
     STATIC_ROOT = os.path.join(BASE_DIR, "static/")
     STATIC_URL = '/static/'
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'static'),
-    ]
 
     RAVEN_CONFIG = {
         'dsn': 'https://dcdd863f4aca4d4b994423ebbd550565:\
@@ -115,8 +112,8 @@ class Base(Configuration):
         'handlers': {
             'sentry': {
                 'level': 'ERROR',
-                'class': 'raven.contrib.django.\
-                          raven_compat.handlers.SentryHandler',
+                'class': 'raven.contrib.django.raven_compat.'
+                         'handlers.SentryHandler',
                 'tags': {'custom-tag': 'x'},
             },
             'console': {
