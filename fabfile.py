@@ -32,14 +32,14 @@ def is_pg_user_exists(username):
     with settings(warn_only=True):
         res = run_as_pg_user('''psql -t -A -c "SELECT COUNT(*) /
               FROM pg_user WHERE usename = '%(username)s';"''' % locals())
-    return (res == 1)
+    return res == 1
 
 
 def is_pg_database_exists(database):
     with settings(warn_only=True):
         res = run_as_pg_user('''psql -t -A -c "SELECT COUNT(*) /
               FROM pg_database WHERE datname = '%(database)s';"''' % locals())
-    return (res == 1)
+    return res == 1
 
 
 def grant_privileges_on_db(database, username):
