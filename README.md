@@ -6,7 +6,7 @@ This project is a first iteration of Transcendence project,according it was done
 - Add view for look information about user(by link:/users/1)
 - Login to [Sentry](https://sentry.io/) and setup LOGGING
 - Setup [django-configurations](https://github.com/jazzband/django-configurations) for convenient configuration
-
+- Create fab script which will be deploy the project on remote production server
 
 
 ## How to Use
@@ -34,7 +34,29 @@ exit()
 python manage.py runserver
 
 ```
+## How to install on remote production server
 
+Step 1. Create SSH folder manually:
 
+```
+mkdir ~/.ssh
+chmod 0700 ~/.ssh
+touch ~/.ssh/authorized_keys
+chmod 0644 ~/.ssh/authorized_keys
+
+```
+
+Step 2. Paste the SSH public key into your ~/.ssh/authorized_keys file(Take public key from remote server)
+
+```
+sudo vim ~/.ssh/authorized_keys
+
+```
+Step 3. Deploy the fab file
+
+```
+fab fab_bootstrap:host=root@159.89.116.66
+
+```
 The code is written for educational purposes. Training course for web-developers - [DEVMAN.org](https://devman.org)
 
