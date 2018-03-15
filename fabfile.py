@@ -8,8 +8,17 @@ DB_NAME = os.environ['DB_NAME']
 DB_USER = os.environ['DB_USER']
 DB_PSWD = os.environ['DB_PSWD']
 REPO_URL = 'https://github.com/samstudy/37_transcendence_1.git'
-PROJECT_FOLDER = '/opt/webapps/37'
-VIRTENV_FOLDER = '/opt/myenv/37_task'
+SPLIT_GIT = 0
+SPLIT_PRJ_NAME = 4
+DIRECTORIES = {
+    'PROJECT_DIR': '/opt/webapps',
+    'GIT_DIR': '/tmp/git_folder',
+    'VIRTENV_DIR': '/opt/myenv'
+    }
+PROJECT_FOLDER = os.path.join(DIRECTORIES['GIT_DIR'], REPO_URL.split('.git')
+                              [SPLIT_GIT].split('/')[SPLIT_PRJ_NAME])
+VIRTENV = os.path.join(DIRECTORIES['VENV_DIR'], REPO_URL.split('.git')
+                       [SPLIT_GIT].split('/')[SPLIT_PRJ_NAME])
 
 
 def prepare_packages():
@@ -56,39 +65,39 @@ def pg_create_database(database, owner):
     run_as_pg_user('createdb %(database)s -O %(owner)s' % locals())
 
 
+def create_folders():
+    for folder in DIRECTORIES.values():
+        with settings(warn_only=True):
+            if not exists(folder):
+                run("mkdir %s" % (folder))
+
+
 def install_git_and_clone_repo():
     with settings(warn_only=True):
         res = run('which git')
-    if res == '/usr/bin/git':
-        print('Git allready installed')
-    else:
-        run("mkdir %s" % (GIT_FOLDER))
-        with cd(GIT_FOLDER):
+    if res == 'git: Command not found.':
+        with cd(DIRECTORIES['GIT_DIR']):
             run('wget https://github.com/git/git/archive/v2.8.1.zip '
                 '-O git.zip')
             run('unzip git.zip')
             with cd('git-*'):
                 run('make prefix=/usr/local all')
                 run('make prefix=/usr/local install')
-    run('rm -rf %s' % (PROJECT_FOLDER))
-    run('mkdir %s' % (PROJECT_FOLDER))
-    with cd(PROJECT_FOLDER):
+    with cd(DIRECTORIES['PRJ_DIR']):
+        run('rm -r %s' % (PRJ_FOLDER))
         run('git clone %s' % (REPO_URL))
 
 
-def create_virt():
-    run('sudo virtualenv %s' % (VIRTENV_FOLDER))
-    run('source %s/bin/activate' % (VIRTENV_FOLDER))
-    with cd(PROJECT_FOLDER):
-        with cd('37_*'):
-            run('pip install -r requirements.txt')
+def create_virt_and_install_req():
+    run('sudo virtualenv %s' % (VIRTENV))
+    with cd(PRJ_FOLDER):
+            run('source %s/bin/activate && \
+                pip install -r requirements.txt' % (VIRTENV))
 
 
 def setup_ngnix():
-    run('sudo /etc/init.d/nginx start')
     run('sudo ln -s ~/opt/webapp/37_transcendence_1/nginx_conf '
         '/etc/nginx/sites-enabled/')
-    run('python manage.py collectstatic')
     run('sudo /etc/init.d/nginx restart')
 
 
@@ -99,6 +108,7 @@ def fab_bootstrap():
     if not is_pg_database_exists(DB_NAME):
         pg_create_database(DB_NAME, DB_USER)
     grant_privileges_on_db(DB_NAME, DB_USER)
+    create_folders()
     install_git_and_clone_repo()
-    create_virt()
+    create_virt_and_install_req()
     setup_ngnix()
