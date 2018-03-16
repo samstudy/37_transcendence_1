@@ -1,7 +1,7 @@
-import random
+import os
 from fabric.contrib.files import append, exists
 from fabric.context_managers import settings
-from fabric.api import cd, env, local, run, sudo
+from fabric.api import cd, env, run, sudo
 
 
 DB_NAME = os.environ['DB_NAME']
@@ -11,12 +11,11 @@ REPO_URL = 'https://github.com/samstudy/37_transcendence_1.git'
 SPLIT_GIT = 0
 SPLIT_PRJ_NAME = 4
 DIRECTORIES = {
-    'PROJECT_DIR': '/opt/webapps',
-    'GIT_DIR': '/tmp/git_folder',
-    'VIRTENV_DIR': '/opt/myenv'
+    'PRJ_DIR': '/opt/web_apps',
+    'VENV_DIR': '/opt/my_env'
     }
-PROJECT_FOLDER = os.path.join(DIRECTORIES['GIT_DIR'], REPO_URL.split('.git')
-                              [SPLIT_GIT].split('/')[SPLIT_PRJ_NAME])
+PRJ_FOLDER = os.path.join(DIRECTORIES['PRJ_DIR'], REPO_URL.split('.git')
+                          [SPLIT_GIT].split('/')[SPLIT_PRJ_NAME])
 VIRTENV = os.path.join(DIRECTORIES['VENV_DIR'], REPO_URL.split('.git')
                        [SPLIT_GIT].split('/')[SPLIT_PRJ_NAME])
 
@@ -30,6 +29,7 @@ def prepare_packages():
         "libpq-dev postgresql postgresql-contrib nginx")
     run("sudo pip3 install --upgrade pip")
     run("sudo apt-get install python-virtualenv")
+    run("sudo apt-get install git")
     sudo("apt-get install uwsgi")
 
 
@@ -68,31 +68,26 @@ def pg_create_database(database, owner):
 def create_folders():
     for folder in DIRECTORIES.values():
         with settings(warn_only=True):
-            if not exists(folder):
-                run("mkdir %s" % (folder))
+            if not exists(os.path.abspath(folder)):
+                run("mkdir %s" % (os.path.abspath(folder)))
 
 
-def install_git_and_clone_repo():
+def get_latest_source_code():
     with settings(warn_only=True):
-        res = run('which git')
-    if res == 'git: Command not found.':
-        with cd(DIRECTORIES['GIT_DIR']):
-            run('wget https://github.com/git/git/archive/v2.8.1.zip '
-                '-O git.zip')
-            run('unzip git.zip')
-            with cd('git-*'):
-                run('make prefix=/usr/local all')
-                run('make prefix=/usr/local install')
-    with cd(DIRECTORIES['PRJ_DIR']):
-        run('rm -r %s' % (PRJ_FOLDER))
-        run('git clone %s' % (REPO_URL))
+        if exists(os.path.abspath(PRJ_FOLDER)):
+            with cd(os.path.abspath(PRJ_FOLDER)):
+                run('git fetch origin')
+                run('git reset --hard origin/master')
+        else:
+            with cd(os.path.abspath(DIRECTORIES['PRJ_DIR'])):
+                run('git clone %s' % (REPO_URL))
 
 
 def create_virt_and_install_req():
-    run('sudo virtualenv %s' % (VIRTENV))
-    with cd(PRJ_FOLDER):
+    run('sudo virtualenv %s' % (os.path.abspath(VIRTENV)))
+    with cd(os.path.abspath(PRJ_FOLDER)):
             run('source %s/bin/activate && \
-                pip install -r requirements.txt' % (VIRTENV))
+                pip install -r requirements.txt' % (os.path.abspath(VIRTENV)))
 
 
 def setup_ngnix():
@@ -109,6 +104,6 @@ def fab_bootstrap():
         pg_create_database(DB_NAME, DB_USER)
     grant_privileges_on_db(DB_NAME, DB_USER)
     create_folders()
-    install_git_and_clone_repo()
+    get_latest_source_code()
     create_virt_and_install_req()
     setup_ngnix()
