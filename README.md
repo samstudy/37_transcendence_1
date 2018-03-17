@@ -58,7 +58,7 @@ Step 3. Deploy the fab file
 fab fab_bootstrap:host=root@159.89.116.66
 
 ```
-Step 4.In this case a server will available by this link  [http://159.89.116.66](http://159.89.116.66)
+Step 4.In this case a server will available by this link  [http://159.89.116.66](http://159.89.116.66:8000)
 
 The code is written for educational purposes. Training course for web-developers - [DEVMAN.org](https://devman.org)
 
