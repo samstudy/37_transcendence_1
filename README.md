@@ -34,7 +34,7 @@ exit()
 python manage.py runserver
 
 ```
-## How to install on remote production server
+## How to install on remote production server.In this case a server will available by this link[http://159.89.116.66](http://159.89.116.66).
 
 Step 1. Create SSH folder manually:
 
