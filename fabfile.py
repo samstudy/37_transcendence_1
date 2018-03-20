@@ -18,6 +18,7 @@ PRJ_FOLDER = os.path.join(DIRECTORIES['PRJ_DIR'], REPO_URL.split('.git')
                           [SPLIT_GIT].split('/')[SPLIT_PRJ_NAME])
 VIRTENV = os.path.join(DIRECTORIES['VENV_DIR'], REPO_URL.split('.git')
                        [SPLIT_GIT].split('/')[SPLIT_PRJ_NAME])
+NGINX_CONF = os.path.join(PRJ_FOLDER, 'nginx_conf/nginx_conf')
 
 
 def prepare_packages():
@@ -40,29 +41,29 @@ def run_as_pg_user(command):
 def is_pg_user_exists(username):
     with settings(warn_only=True):
         res = run_as_pg_user('''psql -t -A -c "SELECT COUNT(*) /
-              FROM pg_user WHERE usename = '%(username)s';"''' % locals())
+              FROM pg_user WHERE usename = '%(username)s';"''')
     return res == 1
 
 
 def is_pg_database_exists(database):
     with settings(warn_only=True):
         res = run_as_pg_user('''psql -t -A -c "SELECT COUNT(*) /
-              FROM pg_database WHERE datname = '%(database)s';"''' % locals())
+              FROM pg_database WHERE datname = '%(database)s';"''')
     return res == 1
 
 
 def grant_privileges_on_db(database, username):
     run_as_pg_user('''psql -t -A -c "GRANT ALL PRIVILEGES ON DATABASE /
-                  %(database)s TO %(username)s;"''' % locals())
+                  %(database)s TO %(username)s;"''')
 
 
 def pg_create_user(username, password):
     run_as_pg_user('''psql -t -A -c "CREATE USER %(username)s /
-                   WITH PASSWORD '%(password)s';"''' % locals())
+                   WITH PASSWORD '%(password)s';"''')
 
 
 def pg_create_database(database, owner):
-    run_as_pg_user('createdb %(database)s -O %(owner)s' % locals())
+    run_as_pg_user('createdb %(database)s -O %(owner)s')
 
 
 def create_folders():
@@ -91,8 +92,8 @@ def create_virt_and_install_req():
 
 
 def setup_ngnix():
-    run('sudo ln -s ~/opt/webapp/37_transcendence_1/nginx_conf '
-        '/etc/nginx/sites-enabled/')
+    run('sudo ln -s ~%s'
+        '/etc/nginx/sites-enabled/' % (os.path.abspath(NGINX_CONF)))
     run('sudo /etc/init.d/nginx restart')
 
 
