@@ -8,16 +8,16 @@ DB_NAME = os.environ['DB_NAME']
 DB_USER = os.environ['DB_USER']
 DB_PSWD = os.environ['DB_PSWD']
 REPO_URL = 'https://github.com/samstudy/37_transcendence_1.git'
-SPLIT_GIT = 0
-SPLIT_PRJ_NAME = 4
+USEFUL_INDEX_GIT = 0
+USEFUL_INDEX_PRJ_NAME = 4
 DIRECTORIES = {
     'PRJ_DIR': '/opt/web_apps',
     'VENV_DIR': '/opt/my_env'
     }
 PRJ_FOLDER = os.path.join(DIRECTORIES['PRJ_DIR'], REPO_URL.split('.git')
-                          [SPLIT_GIT].split('/')[SPLIT_PRJ_NAME])
+                          [USEFUL_INDEX_GIT].split('/')[USEFUL_INDEX_PRJ_NAME])
 VIRTENV = os.path.join(DIRECTORIES['VENV_DIR'], REPO_URL.split('.git')
-                       [SPLIT_GIT].split('/')[SPLIT_PRJ_NAME])
+                       [USEFUL_INDEX_GIT].split('/')[USEFUL_INDEX_PRJ_NAME])
 NGINX_CONF = os.path.join(PRJ_FOLDER, 'nginx_conf/nginx_conf')
 
 
@@ -34,27 +34,26 @@ def prepare_packages():
     sudo("apt-get install uwsgi")
 
 
-def run_as_pg_user(command):
-    return sudo('sudo -i -u postgres %s' % command)
-
-
 def is_pg_user_exists(username):
     with settings(warn_only=True):
-        res = run_as_pg_user('''psql -t -A -c "SELECT COUNT(*) /
-              FROM pg_user WHERE usename = '%(username)s';"''')
-    return res == 1
+        res = run('''
+            sudo -i -u postgres psql -t -A -c "SELECT COUNT(*)
+            FROM pg_user WHERE usename = '%s'"''' % username)
+    return res == '1'
 
 
 def is_pg_database_exists(database):
     with settings(warn_only=True):
-        res = run_as_pg_user('''psql -t -A -c "SELECT COUNT(*) /
-              FROM pg_database WHERE datname = '%(database)s';"''')
-    return res == 1
+        res = run('''
+            sudo -i -u postgres psql -t -A -c "SELECT COUNT(*)
+            FROM pg_database WHERE datname='%s'"''' % database)
+    return res == '1'
 
 
 def grant_privileges_on_db(database, username):
-    run_as_pg_user('''psql -t -A -c "GRANT ALL PRIVILEGES ON DATABASE /
-                  %(database)s TO %(username)s;"''')
+    run('''
+        sudo -i -u postgres psql -t -A -c "GRANT ALL
+        PRIVILEGES ON DATABASE %s TO %s"''' % (database, username))
 
 
 def pg_create_user(username, password):
@@ -62,8 +61,14 @@ def pg_create_user(username, password):
                    WITH PASSWORD '%(password)s';"''')
 
 
+def pg_create_user(username, password):
+    run('''
+        sudo -i -u postgres psql -t -A -c
+        "CREATE USER %s WITH PASSWORD '%s'"''' % (username, password))
+
+
 def pg_create_database(database, owner):
-    run_as_pg_user('createdb %(database)s -O %(owner)s')
+    run('sudo -i -u postgres createdb %s -O %s' % (database, owner))
 
 
 def create_folders():
@@ -87,8 +92,8 @@ def get_latest_source_code():
 def create_virt_and_install_req():
     run('sudo virtualenv %s' % (os.path.abspath(VIRTENV)))
     with cd(os.path.abspath(PRJ_FOLDER)):
-            run('source %s/bin/activate && \
-                pip install -r requirements.txt' % (os.path.abspath(VIRTENV)))
+            run('source %s/bin/activate && pip install -r requirements.txt' %
+                (os.path.abspath(VIRTENV)))
 
 
 def setup_ngnix():
