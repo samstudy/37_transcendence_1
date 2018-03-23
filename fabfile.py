@@ -31,7 +31,7 @@ def prepare_packages():
     run("sudo pip3 install --upgrade pip")
     run("sudo apt-get install python-virtualenv")
     run("sudo apt-get install git")
-    sudo("apt-get install uwsgi")
+    run("sudo apt-get install uwsgi")
 
 
 def is_pg_user_exists(username):
@@ -57,7 +57,7 @@ def grant_privileges_on_db(database, username):
 
 
 def pg_create_user(username, password):
-    run_as_pg_user('''psql -t -A -c "CREATE USER %(username)s /
+    run('''psql -t -A -c "CREATE USER %(username)s /
                    WITH PASSWORD '%(password)s';"''')
 
 
@@ -97,7 +97,7 @@ def create_virt_and_install_req():
 
 
 def setup_ngnix():
-    run('sudo ln -s ~%s'
+    run('sudo ln -sf ~%s'
         '/etc/nginx/sites-enabled/' % (os.path.abspath(NGINX_CONF)))
     run('sudo /etc/init.d/nginx restart')
 
