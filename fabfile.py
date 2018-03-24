@@ -24,7 +24,7 @@ NGINX_CONF = os.path.join(PRJ_FOLDER, 'nginx_conf/nginx_conf')
 def prepare_packages():
     run("sudo apt-get update")
     run("sudo apt-get upgrade")
-    run("sudo sudo apt-get install build-essential "
+    run("sudo apt-get install build-essential "
         "libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext unzip")
     run("sudo apt-get install python3-pip python3-dev "
         "libpq-dev postgresql postgresql-contrib nginx")
@@ -54,11 +54,6 @@ def grant_privileges_on_db(database, username):
     run('''
         sudo -i -u postgres psql -t -A -c "GRANT ALL
         PRIVILEGES ON DATABASE %s TO %s"''' % (database, username))
-
-
-def pg_create_user(username, password):
-    run('''psql -t -A -c "CREATE USER %(username)s /
-                   WITH PASSWORD '%(password)s';"''')
 
 
 def pg_create_user(username, password):
