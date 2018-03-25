@@ -22,16 +22,16 @@ NGINX_CONF = os.path.join(PRJ_FOLDER, 'nginx_conf/nginx_conf')
 
 
 def prepare_packages():
-    run("sudo apt-get update")
-    run("sudo apt-get upgrade")
-    run("sudo apt-get install build-essential "
+    sudo("apt-get update")
+    sudo("apt-get upgrade")
+    sudo("apt-get install build-essential "
         "libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext unzip")
-    run("sudo apt-get install python3-pip python3-dev "
+    sudo("apt-get install python3-pip python3-dev "
         "libpq-dev postgresql postgresql-contrib nginx")
-    run("sudo pip3 install --upgrade pip")
-    run("sudo apt-get install python-virtualenv")
-    run("sudo apt-get install git")
-    run("sudo apt-get install uwsgi")
+    sudo("pip3 install --upgrade pip")
+    sudo("apt-get install python-virtualenv")
+    sudo("apt-get install git")
+    sudo("apt-get install uwsgi")
 
 
 def is_pg_user_exists(username):
@@ -92,9 +92,9 @@ def create_virt_and_install_req():
 
 
 def setup_ngnix():
-    run('sudo ln -sf ~%s'
+    run('ln -sf ~%s'
         '/etc/nginx/sites-enabled/' % (os.path.abspath(NGINX_CONF)))
-    run('sudo /etc/init.d/nginx restart')
+    sudo('/etc/init.d/nginx restart')
 
 
 def fab_bootstrap():
