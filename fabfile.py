@@ -56,7 +56,7 @@ def is_pg_database_exists(database):
 def grant_privileges_on_db(database, username):
     run(run_as_pg_user('''
         psql -t -A -c "GRANT ALL
-        PRIVILEGES ON DATABASE %s TO %s"''' % (database, username))
+        PRIVILEGES ON DATABASE %s TO %s"''' % (database, username)))
 
 
 def pg_create_user(username, password):
