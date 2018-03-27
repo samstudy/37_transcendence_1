@@ -37,31 +37,34 @@ def prepare_packages():
 def run_as_pg_user(command):
     return 'sudo -i -u postgres %s' % command
 
+
+def make_query_interactively(query):
+    return 'psql -t -A -c %s' % command
+
+
 def is_pg_user_exists(username):
     with settings(warn_only=True):
-        res = run(run_as_pg_user('''
-            psql -t -A -c "SELECT COUNT(*)
-            FROM pg_user WHERE usename = '%s'"''' % username))
+        res = run(run_as_pg_user(make_query_interactively('''
+            "SELECT COUNT(*)FROM pg_user WHERE usename = '%s'"''' % username)))
     return res == '1'
 
 
 def is_pg_database_exists(database):
     with settings(warn_only=True):
-        res = run(run_as_pg_user('''
-            psql -t -A -c "SELECT COUNT(*)
-            FROM pg_database WHERE datname='%s'"''' % database))
+        res = run(run_as_pg_user(make_query_interactively('''
+            "SELECT COUNT(*)
+            FROM pg_database WHERE datname='%s'"''' % database)))
     return res == '1'
 
 
 def grant_privileges_on_db(database, username):
-    run(run_as_pg_user('''
-        psql -t -A -c "GRANT ALL
-        PRIVILEGES ON DATABASE %s TO %s"''' % (database, username)))
+    run(run_as_pg_user(make_query_interactively('''
+       "GRANT ALL PRIVILEGES ON DATABASE %s TO %s"''' % (database, username))))
 
 
 def pg_create_user(username, password):
-    run(run_as_pg_user('''psql -t -A -c
-        "CREATE USER %s WITH PASSWORD '%s'"''' % (username, password)))
+    run(run_as_pg_user(make_query_interactively('''
+        "CREATE USER %s WITH PASSWORD '%s'"''' % (username, password))))
 
 
 def pg_create_database(database, owner):
